@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <link href="style/admin.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width,maximum-scale=1.0,initial-scale=1,user-scalable=no">
+    <link href="style/fit.css" rel="stylesheet" type="text/css" />
+    <link href="style/fitmobile.css" rel="stylesheet" type="text/css" />
+     <script type="text/javascript" src="js/cookie.js"></script>
+    <title>工作空间查看</title>
+    <style>
+        .edivtext{
+            text-align: center;
+            line-height: 55px;
+        }
+     
+        #fedive{
+          
+top:0px;
+
+    position: relative;
+    background-color: #e9e9e9;
+   width: 100%;
+   height: 90%;
+    padding-top: 20px;
+   
+        }
+    </style>
+
+</head>
+
+<body class="bod">
+    <div class="search">
+        <div class="imglo">
+        </div>
+
+        <div><a href="workspace.html" style="background-image: url(image/set.png);" class="herder-left">工作空间</a>
+        </div>
+        <div>
+            <ul id="list">
+                <li>
+                    <a href="#javascript" style="background-image: url(image/mission.png);" class="herder-left">用户信息</a>
+                    <ul>
+                        <li><a href="muser.html">用户管理</a></li>
+                        <li><a href="mulog.html">用户日志</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="verticalw">
+            <a class="herder-left" style="width: 130px; background-image: url(image/shutdown_w.png);"
+                onclick="removeCookies('userid')">安全退出</a>
+        </div>
+    </div>
+
+    <div class="wname">
+        <div class="leftbox">
+            <div class="ltopbox">工作空间{{workspace_name}}</div>
+            <ul>
+                <li><a id="a" href="#" style="background-color: #f1f1f1;color: #5cb4e3; padding: 10px 50px;"
+                        class="dropbtn">查看</a></li>
+                <li> <a href="lsetup.html" class="xinxi">库位设置</a></li>
+                <li> <a href="modubus.html" style="padding: 10px 10px;"class="netway">Modubus网关设置</a></li>
+            </ul>
+        </div>
+
+        <div class="login">
+            <div class="timu">
+                <div style="background-position: 75px center;"> 工作空间-{{workspace_name}}</div>
+                <div style=" background-position: 40px center;"> 查看</div>
+            </div>
+            <div class="container" id="admin">
+                <div id="divhe">
+                   
+                        
+                    <div id="fediv" style="overflow: scroll;">
+                        <h2 style="margin-left: 45%;">{{workspace_name}}-FGS库位</h2>
+                       <div id="fedive">
+                       
+                        <div>
+                            <ul class="allshow">
+                                <li><span class="catecolorp">
+                                        <label>正品</label>
+                                    </span></li>
+                                <li><span class="catecolorl">
+                                        <label>样品</label>
+                                    </span></li>
+                                <li><span class="catecolor">
+                                        <label>空库位</label>
+                                    </span></li>
+
+
+                            </ul>
+
+                        </div>
+                    
+                    </div>
+                    </div>
+                   
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </div>
+
+  
+    <script type="text/javascript" src="https://unpkg.com/vue@2.3.4/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+   
+    <script>
+        var admin = new Vue({
+            el: '.wname',
+            data: {
+                workspace_name: '',
+                all_thing: [],
+            },
+            created() {
+                    // var that = this;
+                    this.workspace_name = localStorage.getItem("b");
+                //    axios.get(
+                //            "http://120.48.51.127:8880/getWork",
+                //        )
+                //        .then(function (response) {
+                           
+                //            that.workspace_name = (response.data.work[0].name);
+                          
+                //        })
+                //        .catch(function (err) { })
+                    
+                    
+                },
+                mounted() {
+                setInterval(() => {
+                   
+                    setTimeout(() => {
+                    var that=this
+                    const params = new URLSearchParams();
+                    params.append('db', admin.workspace_name);
+                    axios.post('find', params,//获取位置
+                            {
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                            })
+                            .then(function (response) {
+                                if (JSON.stringify(response.data) === '{}') {
+                                 
+                                    return;
+                                }
+                                that.position = response.data.position
+                                for (var i = 0; i < admin.position.length; i++) {
+                                    con.getElementsByClassName('ediv')[i].style.top = admin.position[i].top + "px";
+                                    con.getElementsByClassName('ediv')[i].style.left = admin.position[i].left + "px";
+                                    if (admin.position[i].count === '1') {
+                                        if(admin.position[i].contain==="正品"){
+                                            con.getElementsByClassName('ediv')[i].classList.add('colorp')
+                                            con.getElementsByClassName('ediv')[i].innerHTML = admin.position[i].name 
+                                        }
+                                        else{
+                                            con.getElementsByClassName('ediv')[i].classList.add('colorl')
+                                            con.getElementsByClassName('ediv')[i].innerHTML = admin.position[i].name 
+                                        } 
+                                    }
+                                    else {                          
+                                        con.getElementsByClassName('ediv')[i].classList.add('color')                                                    
+                                        con.getElementsByClassName('ediv')[i].innerHTML = admin.position[i].name
+                                    }
+                       
+                                }
+
+                            })
+                            .catch(function (err) { })
+                            window.location.reload()
+                          
+
+                   }, 300);
+                  
+                }, 1000*60*2);
+               
+            },
+
+            methods: {
+
+            }
+        })
+    </script>
+    <script>
+        window.onload = function () {
+            post();
+          
+
+        }
+
+        function post() {
+         
+            const params = new URLSearchParams();
+            params.append('db', admin.workspace_name,);
+            axios.post('http://120.48.51.127:8880/find', params,//获取位置
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                })
+                .then(function (response) {
+                    admin.position = response.data.position;
+                    for (var i = 0; i < admin.position.length; i++) {
+                        var div = document.createElement("div"); //创建一个标签
+                        div.className = "ediv edivtext"; //给创建的div设置class；
+                        var con = document.getElementById('fedive'); //获取标签
+                        con.appendChild(div); //向刚获取的标签中添加创建的标签
+                    }
+                    for (var i = 0; i < admin.position.length; i++) {
+                        con.getElementsByClassName('ediv')[i].style.top = admin.position[i].top + "px";
+                        con.getElementsByClassName('ediv')[i].style.left = admin.position[i].left + "px";
+                        if (admin.position[i].count === '1') {
+                           if(admin.position[i].contain==="正品"){
+                            con.getElementsByClassName('ediv')[i].classList.add('colorp')
+                            con.getElementsByClassName('ediv')[i].innerHTML = admin.position[i].name 
+                           }
+                            
+                            else{
+                                
+                            con.getElementsByClassName('ediv')[i].classList.add('colorl')
+                            con.getElementsByClassName('ediv')[i].innerHTML = admin.position[i].name 
+                            } 
+                        }
+                        else {                          
+                            con.getElementsByClassName('ediv')[i].classList.add('color')                                                    
+                            con.getElementsByClassName('ediv')[i].innerHTML = admin.position[i].name
+                        }
+                       
+                    }
+
+                })
+                .catch(function (err) { })
+        }
+      
+    </script>
+</body>
+
+</html>

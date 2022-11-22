@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <link href="style/fit.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <link href="style/admin.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width,maximum-scale=1.0,initial-scale=1,user-scalable=no">
+    <link href="style/fit.css" rel="stylesheet" type="text/css" />
+    <link href="style/fitmobile.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <title>设置</title>
+</head>
+
+<body class="bod">
+    <div class="search">
+        <div class="imglo">
+        </div>
+
+        <div><a href="workspace.html" style="background-image: url(image/set.png);" class="herder-left">工作空间</a>
+        </div>
+        <div>
+            <ul id="list">
+                <li>
+                    <a href="#javascript" style="background-image: url(image/mission.png);" class="herder-left">用户信息</a>
+                    <ul>
+                        <li><a href="muser.html">用户管理</a></li>
+                        <li><a href="mulog.html">用户日志</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="verticalw">
+            <a class="herder-left" style="width: 130px; background-image: url(image/shutdown_w.png);"
+                onclick="removeCookies('userid')">安全退出</a>
+        </div>
+    </div>
+
+    <div class="wname">
+        <div class="leftbox">
+            <div class="ltopbox">编号{{modubus_name}}</div>
+
+
+        </div>
+
+        <div class="login">
+            <div class="timu">
+                <div style="background-position: 75px center;"> 工作空间{{workspace_name}}</div>
+                <div style="margin-left: 10px;"> 库位设置</div>
+                <div style="margin-left: 10px;"> 网关设置</div>
+                <div style="margin-left: 10px;"> 设置</div>
+            </div>
+
+            <div class="container" id="lsetup">
+                <div class="butto3">
+                    <div>
+                        <select name="" class="butto1" id="location">
+                            <option value="">库位名称</option>
+                            <option v-for="item in menudata" v-bind:value="item.name" v-text="item.name"></option>
+                        </select>
+
+                        <input type="text" class="button1" placeholder="请输入寄存器编号" id="register">
+                        <input type="button" class="add" onclick="add()" value="+添加">
+                    </div>
+
+                    <input type="button" class="add" onclick="location.href=('modubus.html')" value="返回>>">
+                </div>
+
+                <div class="tabcontainer">
+                    <table id="ltab">
+                        <tr>
+                            <th>编号</th>
+                            <th>库位名称</th>
+                            <th id="sensor">寄存器</th>
+                            <th colspan="2">操作</th>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <script type="text/javascript" src="https://unpkg.com/vue@2.3.4/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript">
+        var db = localStorage.getItem("b");
+        var dc = localStorage.getItem("c");
+        // console.log(dc);
+        function del(obj) {
+
+            const params = new URLSearchParams();
+            params.append('name', dc);
+            params.append('direction', obj.parentNode.parentNode.cells[1].innerText);
+            params.append('type', "slaves");
+            params.append('db', db);
+            axios.post(
+                'del', params,
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                }
+
+            )
+                .then(function (response) {
+                    var res = response.data;
+                    if (res.status === 200) {
+                        console.log('OK')
+                        obj.parentNode.parentNode.remove();
+                        var mytab = document.getElementById("ltab");
+
+for (var i = 1; i <= mytab.rows.length; i++){
+    mytab.rows[i].cells[0].innerHTML = i;
+}
+                        
+                    }
+                    
+                })
+                .catch(function (err) {console.log('error!') })
+           
+           
+              
+        }
+
+        function myfun1() {
+
+            const params = new URLSearchParams();
+            params.append('type', "store");
+            params.append('db', db);
+            params.append('ip', dc);
+            axios.post(
+                "getSlaves", params,
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                }
+            )
+                .then(function (response) {
+                    var them;
+                    for (var i = 0; i < JSON.parse(JSON.stringify(response.data.location)).length; i++) {
+                        var tabRow;
+                        var mytab = document.getElementById("ltab");
+                        tabRow = mytab.insertRow(mytab.rows.length);
+                        tabRow.insertCell(0).innerHTML = mytab.rows.length - 1;
+                        tabRow.insertCell(1).innerHTML = JSON.parse(JSON.stringify(response.data.location))[i].location;
+
+                        tabRow.insertCell(2).innerHTML = JSON.parse(JSON.stringify(response.data.location))[i].reg;
+                        tabRow.insertCell(3).innerHTML = "<a href='#'  class='buinp'  onclick=del(this)>删除</a>";
+                        tabRow.insertCell(4).innerHTML = "<a href='#'  class='buinp'  onclick=edit(this)>修改</a>";
+                    }
+                    
+                })
+                .catch(function (err) { });
+        }
+        window.onload = myfun1;
+    </script>
+    <script>
+        var lsetup = new Vue({
+            el: '.wname',
+            data: {
+                workspace_name: '',
+                modubus_name: '',
+                menudata: [
+                ],
+
+            },
+            mounted() {
+                //可以直接调用vue的方法
+                this.workspace_name = db;
+                this.modubus_name = dc;
+                var that = this;
+                const params = new URLSearchParams();
+                params.append('type', "store");
+                params.append('db', db);
+                axios.post(
+                    "getLocation", params,
+                    {
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    })
+                    .then(function (response) {
+                        that.menudata = JSON.parse(JSON.stringify(response.data.location))
+                    })
+                    .catch(function (err) { });
+            },
+            methods: {
+
+            }
+        })
+    </script>
+
+    <script>
+        function edit(obj) {
+            var str = obj.parentNode.parentNode;
+            str.cells[2].innerHTML = "<input type='text' class='button1' placeholder='请输入寄存器编号' id='registere'>";
+            str.cells[4].innerHTML = "<a href='#' class='buinp' onclick=getBack(this)>确定</a>";
+        }
+        function getBack(obj) {
+            var db = localStorage.getItem("b")
+            var str = obj.parentNode.parentNode;
+            str.cells[2].innerHTML = document.getElementById("registere").value;
+            str.cells[3].innerHTML = "<a href='#' class='buinp' onclick=edit(this)>修改</a>"
+            const params = new URLSearchParams();
+            params.append('name2', str.cells[2].innerHTML);
+            params.append('name', str.cells[1].innerHTML);
+            params.append('db', db);
+            params.append('ip', dc);
+            params.append('type', "slaves");
+            axios.post(
+                'change', params,
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                }
+            )
+                .then(function (response) {
+                    var res = response.data;
+                    if (res.status === 200) {
+                        console.log('OK')
+                       
+                    }
+                  
+                })
+                .catch(function (err) {  console.log('error!')})
+
+        }
+        /*添加工作空间*/
+        function add() {
+            var mytab = document.getElementById("ltab");
+            //获取用户信息
+            var no = mytab.rows.length;
+            var lname = document.getElementById("location").value;
+            var sensor = document.getElementById("sensor").value;
+            var register = document.getElementById("register").value;
+            // var index = lsetup.menudata.findIndex(item => item.name === lname);
+            var tabRow;
+
+            for (var i = 1; i < mytab.rows.length; i++) {
+                var num = mytab.rows[i].cells[1].innerText;
+                var sen = mytab.rows[i].cells[2].innerText;
+                //如果当前的表单中工作空间名称和输入的工作空间名称有重复提示用户，并返回不添加
+                if (num == lname) {
+                    alert("该名称库位已存在");
+                    return false;
+                }
+                if (sen == register) {
+                        alert("该寄存器已存在，不可重复添加");
+                        return false;
+                    }
+
+            }
+
+            if (lname === '' || register === '') {
+                alert('请检查信息是否完整');
+            }
+            else {
+                
+                const params = new URLSearchParams();
+
+                params.append('name', lname);
+                params.append('direction', register);
+                params.append('db', db);
+                params.append('ip', dc);
+                params.append('type', "slaves");
+                axios.post(
+                    'add', params,
+                    {
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    }
+                )
+                .then(function (response) {
+                    var res = response.data;
+                    if (res.status === 200) {
+                        console.log('OK')
+                        var temp;
+                //插入行的列
+                //要插入的行
+                tabRow = mytab.insertRow(mytab.rows.length);
+                tabRow.insertCell(0).innerHTML = no;
+                tabRow.insertCell(1).innerHTML = lname;
+
+                tabRow.insertCell(2).innerHTML = register;
+                tabRow.insertCell(3).innerHTML = "<a href='#' class='buinp' onclick=del(this)>删除</a>";
+                tabRow.insertCell(4).innerHTML = "<a href='#'  class='buinp'  onclick=edit(this)>修改</a>";
+
+                       
+                    }
+                  
+                })
+                .catch(function (err) {  console.log('error!')})
+            }
+        }
+    </script>
+
+</body>
+
+</html>

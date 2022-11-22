@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <link href="style/fit.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <link href="style/admin.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width,maximum-scale=1.0,initial-scale=1,user-scalable=no">
+    <link href="style/fit.css" rel="stylesheet" type="text/css" />
+    <link href="style/fitmobile.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <title>网关设置</title>
+</head>
+
+<body class="bod">
+    <div class="search">
+        <div class="imglo">
+        </div>
+		
+        <div><a href="workspace.html" style="background-image: url(image/set.png);" class="herder-left">工作空间</a>
+        </div>
+        <div>
+            <ul id="list">
+                <li>
+                    <a href="#javascript" style="background-image: url(image/mission.png);" class="herder-left">用户信息</a>
+                    <ul>
+                        <li><a href="muser.html">用户管理</a></li>
+                        <li><a href="mulog.html">用户日志</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="verticalw">
+            <a class="herder-left" style="width: 130px; background-image: url(image/shutdown_w.png);"
+                onclick="removeCookies('userid')">安全退出</a>
+        </div>
+    </div>
+
+    <div class="wname">
+        <div class="leftbox">
+            <div class="ltopbox">工作空间{{workspace_name}}</div>
+
+            <ul>
+                <li><a id="a" href="findspace.html" class="dropbtn" style="padding: 10px 50px;">查看</a></li>
+                <li> <a href="lsetup.html" class="xinxi">库位设置</a></li>
+				<li> <a href="modubus.html" style="background-color: #f1f1f1;color: #5cb4e3;padding:10px 10px; "class="netway">Modubus网关设置</a></li>
+            </ul>
+        </div>
+
+        <div class="login">
+            <div class="timu">
+                <div style="background-position: 75px center;"> 工作空间-{{workspace_name}}</div>
+                <div style="margin-left: 10px;"> 网关设置</div>
+            </div>
+
+            <div class="container" id="lsetup">
+                <div class="butto3">
+					<input type="text" class="button1" placeholder="请输入IP地址" id="ipInput">
+                    <input type="button" class="add" onclick="add()" value="+添加">
+                </div>
+
+                <div class="tabcontainer">
+                    <table id="ltab">
+                        <tr>
+                            <th>编号</th>
+                            <th>IP地址</th>
+                            <th colspan =2>操作</th>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <script type="text/javascript" src="https://unpkg.com/vue@2.3.4/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript">
+		//db -> 工作空间名称
+        var db = localStorage.getItem("b");
+		
+		//删除
+        function del(obj) {
+         
+            var mytab = document.getElementById("ltab");
+
+            const params = new URLSearchParams();
+            params.append('name', obj.parentNode.parentNode.cells[1].innerText);
+            params.append('db', db);
+            params.append('type', "modbus");
+            axios.post(
+                'del', params,
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                }
+            )
+            .then(function (response) {
+                    var res = response.data;
+                    if (res.status === 200) {
+                        console.log('OK')
+                        obj.parentNode.parentNode.remove();
+                       
+                    }
+                  
+                })
+                .catch(function (err) {  console.log('error!')})
+
+            for (var i = 1; i <= mytab.rows.length; i++)
+                mytab.rows[i].cells[0].innerHTML = i;
+        }
+		
+		
+		//查找所有的网关
+        function myfun1() {
+            const params = new URLSearchParams();
+            //params.append('type', "all");
+            params.append('db', db);
+			// params.append('ip', ip);
+            axios.post(
+                "getmodbus", params,
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                })
+                .then(function (response) {
+                    var res = response.data;
+                    if (res.status === 200) {
+                        console.log('OK')
+                        console.log(JSON.parse(JSON.stringify(response.data.location)))
+                    var them;
+                    for (var i = 0; i < JSON.parse(JSON.stringify(response.data.location)).length; i++) {
+                        var tabRow;
+                        var mytab = document.getElementById("ltab");
+                        tabRow = mytab.insertRow(mytab.rows.length);
+                        tabRow.insertCell(0).innerHTML = mytab.rows.length - 1;
+                        tabRow.insertCell(1).innerHTML = JSON.parse(JSON.stringify(response.data.location))[i].ip;
+                        tabRow.insertCell(2).innerHTML = "<a href='#' onclick=del(this) class='buinp'>删除</a>";
+						tabRow.insertCell(3).innerHTML = "<a href='sensorSet.html' class='buinp' onclick=use(this)>设置</a>";
+                    }
+                    }
+                   
+                })
+                .catch(function (err) { });
+        }
+		
+        window.onload = myfun1;
+		
+    </script>
+	
+	
+    <script>
+		//vue
+        var lsetup = new Vue({
+            el: '.wname',
+        	data: {
+                workspace_name: '',
+                menudata: [
+                ]
+            },
+            mounted() {
+                //可以直接调用vue的方法
+                // this.workspace_name = db;
+                // var that = this;
+                // const params = new URLSearchParams();
+                // params.append('db', db);
+                // axios.post(
+                //     'http://120.53.107.137:8888/tcp', params,
+                //     {
+                //         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                //     }
+                // )
+                //     .then(function (response) {
+                //         that.menudata = JSON.parse(JSON.stringify(response.data.id))
+                //     })
+                //     .catch(function (err) { });
+            },
+            methods: {
+            }
+        })
+    </script>
+   
+    <script>
+        function use(obj) {
+                    localStorage.setItem("c", obj.parentNode.parentNode.cells[1].innerText);
+                }
+        /*添加*/
+        function add() {
+            var mytab = document.getElementById("ltab");
+            //获取用户信息
+            var no = mytab.rows.length;
+            var ip = document.getElementById("ipInput").value;
+            var index = lsetup.menudata.findIndex(item => item.ip === ip); //在列表中找出满足ip的索引
+            var tabRow;
+
+            for (var i = 1; i < mytab.rows.length; i++) {
+                var ip1 = mytab.rows[i].cells[1].innerText;
+                //如果当前的表单中工作空间名称和输入的工作空间名称有重复提示用户，并返回不添加
+                if (ip == ip1) {
+                    alert("当前ip已重复");
+                    return false;
+                }
+            }
+
+            if (ip === '') {
+                alert('请检查信息是否完整');
+                return false;
+            }
+            else {
+                var temp;
+
+
+                const params = new URLSearchParams();
+                params.append('ip', ip);
+                params.append('db', db);
+                params.append("type", "modbus");
+                // params.append('top', lsetup.menudata[index].top);
+                // params.append('left', lsetup.menudata[index].left);
+                axios.post(
+                    'add', params,
+                    {
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    }
+                )
+                    .then(function (response) {
+                        var res = response.data;
+                        if(res.status=="error"){
+                            alert("连接失败")
+                        }
+                        if (res.status === 200) {
+                        console.log('OK')
+                        //插入行的列
+                //要插入的行
+                tabRow = mytab.insertRow(mytab.rows.length);
+                tabRow.insertCell(0).innerHTML = no;
+                tabRow.insertCell(1).innerHTML = ip;
+                tabRow.insertCell(2).innerHTML = "<a href='#' class='buinp' onclick=del(this)>删除</a>";
+				tabRow.insertCell(3).innerHTML = "<a href='sensorSet.html' class='buinp' onclick=use(this)>设置</a>";
+                       
+                    }
+                    })
+                    .catch(function (err) { })
+                
+                
+            }
+        }
+    </script>
+</body>
+
+</html>

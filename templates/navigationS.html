@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <link href="style/admin.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <link href="style/fitmobile.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style/fit.css" rel="stylesheet" type="text/css" />
+    <link href="style/fitmobile.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width,maximum-scale=1.0,initial-scale=1,user-scalable=no">
+    <title>超市用户首页</title>
+    <style>
+        @media screen and (max-width:600px) {
+
+            html,
+            body {
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .imglo {
+                display: none;
+
+            }
+
+            .herder-left {
+                text-decoration: none;
+                color: white;
+                line-height: 79px;
+                display: inline-block;
+                width: 95px;
+                height: 79px;
+                font-size: 14px;
+                text-align: center;
+                text-indent: 2.5em;
+                background-size: 15%;
+                background-repeat: no-repeat;
+                background-position: 1.5em center;
+            }
+
+            .verticalw {
+                border-left: 2px solid #f1f1f1;
+                font-size: 14px;
+                width: 115px;
+                height: 77px;
+                position: absolute;
+                right: 0;
+            }
+
+            .navleft {
+                display: none;
+            }
+
+            .navright {
+                width: 100%;
+            }
+        }
+    </style>
+
+</head>
+
+
+<body class="bod">
+    <div class="search bar3">
+        <div class="imglo">
+        </div>
+
+        <div><a href="Sfindspace.html" style="background-image: url(image/Wsite2.png);" class="herder-left">查看</a>
+        </div>
+
+
+        <div class="verticalw">
+            <a class="herder-left" style="width: 130px; background-image: url(image/shutdown_w.png);"
+                onclick="removeCookies('userid')">安全退出</a>
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <div class="navbody">
+        <div class="navtop"></div>
+
+        <div class="navdirection">
+            <div class="navleft"></div>
+
+            <div class="navright">
+                <ul>
+                    <li>
+                        <p>系统名称:Mover site FGS</p>
+                    </li>
+                    <li>
+                        <p>软件版本:1.0</p>
+                    </li>
+                    <li>
+                        <p>开机时长: <span id='getTime'></span>毫秒</p>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+
+<script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+<script>
+    var app = new Vue({
+        el: '.navbody',
+        
+    })
+</script>
+<script>
+    var getTime = document.getElementById('getTime')
+    getTime.innerText = performance.now();
+
+</script>
+
+</html>

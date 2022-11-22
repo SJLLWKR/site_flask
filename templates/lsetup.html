@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <link href="style/fit.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <link href="style/admin.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width,maximum-scale=1.0,initial-scale=1,user-scalable=no">
+    <link href="style/fit.css" rel="stylesheet" type="text/css" />
+    <link href="style/fitmobile.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <title>库位设置</title>
+</head>
+
+<body class="bod">
+    <div class="search">
+        <div class="imglo">
+        </div>
+
+        <div><a href="workspace.html" style="background-image: url(image/set.png);" class="herder-left">工作空间</a>
+        </div>
+        <div>
+            <ul id="list">
+                <li>
+                    <a href="#javascript" style="background-image: url(image/mission.png);" class="herder-left">用户信息</a>
+                    <ul>
+                        <li><a href="muser.html">用户管理</a></li>
+                        <li><a href="mulog.html">用户日志</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="verticalw">
+            <a class="herder-left" style="width: 130px; background-image: url(image/shutdown_w.png);"
+                onclick="removeCookies('userid')">安全退出</a>
+        </div>
+    </div>
+
+    <div class="wname">
+        <div class="leftbox">
+            <div class="ltopbox">工作空间{{workspace_name}}</div>
+
+            <ul>
+                <li><a id="a" href="findspace.html" class="dropbtn" style="padding: 10px 50px;">查看</a></li>
+                <li> <a href="#" style="background-color: #f1f1f1;color: #5cb4e3;" class="xinxi">库位设置</a></li>
+                <li> <a href="modubus.html" style="padding: 10px 10px;"class="netway">Modubus网关设置</a></li>
+            </ul>
+        </div>
+
+        <div class="login">
+            <div class="timu">
+                <div style="background-position: 75px center;"> 工作空间-{{workspace_name}}</div>
+                <div style="margin-left: 10px;"> 库位设置</div>
+            </div>
+
+            <div class="container" id="lsetup">
+                <div class="butto3">
+                    <div>
+                        <select name="" class="butto1" id="location">
+                            <option value="">库位名称</option>
+                            <option v-for="item in menudata" v-bind:value="item" v-text="item"></option>
+                        </select>
+                        <select name="" class="butto1" id="ltype" v-model="ltype" onchange="changesite(this.value)">
+                            <option value="">选择库位类型</option>
+                            <option value="站点">站点</option>
+                            <option value="仓库">仓库</option>
+                        </select>
+                        <input type="text" class="button1" placeholder="请输入组别" id="lgroup">
+                        <input type="button" class="add" onclick="add()" value="+添加">
+                    </div>
+                  
+                </div>
+
+                <div class="tabcontainer">
+                    <table id="ltab">
+                        <tr>
+                            <th>编号</th>
+                            <th>库位名称</th>
+                            <th>库位类型</th>
+                            <th>库位组别</th>
+                            <th >操作</th>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <script type="text/javascript" src="https://unpkg.com/vue@2.3.4/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript">
+        var db = localStorage.getItem("b");
+        var position = localStorage.getItem("type");
+        var rob = localStorage.getItem("rob");
+
+        function del(obj) {
+           
+            var mytab = document.getElementById("ltab");
+
+            const params = new URLSearchParams();
+            params.append('name', obj.parentNode.parentNode.cells[1].innerText);
+            params.append('type', "kw");
+            params.append('db', db);
+            axios.post(
+                'del', params,
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                }
+
+            )
+            .then(function (response) {
+                    var res = response.data;
+                    if (res.status === 200) {
+                        console.log('OK')
+                        obj.parentNode.parentNode.remove();
+                       
+                    }
+                  
+                })
+                .catch(function (err) {  console.log('error!')})
+
+            for (var i = 1; i <= mytab.rows.length; i++){
+                mytab.rows[i].cells[0].innerHTML = i;
+            }
+                
+        }
+        
+        function myfun1() {
+            
+            const params = new URLSearchParams();
+            params.append('type', "all");
+            params.append('db', db);
+            axios.post(
+                "getLocation", params,
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                }
+            )
+                .then(function (response) {
+                    var res = response.data;
+                    var them;
+                    for (var i = 0; i < JSON.parse(JSON.stringify(response.data.location)).length; i++) {
+                        var tabRow;
+                        var mytab = document.getElementById("ltab");
+                        tabRow = mytab.insertRow(mytab.rows.length);
+                        tabRow.insertCell(0).innerHTML = mytab.rows.length - 1;
+                        tabRow.insertCell(1).innerHTML = JSON.parse(JSON.stringify(response.data.location))[i].name;
+                        tabRow.insertCell(2).innerHTML = JSON.parse(JSON.stringify(response.data.location))[i].type;
+                        tabRow.insertCell(3).innerHTML = JSON.parse(JSON.stringify(response.data.location))[i].group;
+                        tabRow.insertCell(4).innerHTML = "<a href='#'  class='buinp'  onclick=del(this)>删除</a>";
+                    }
+                   
+                })
+                .catch(function (err) { console.log('error!')});
+        }
+        window.onload = myfun1;
+    </script>
+     <script>
+        var lsetup = new Vue({
+            el: '.wname',
+            data: {
+                workspace_name: '',
+                menudata: [
+                ],
+                ltype:''
+            },
+            mounted() {
+                //可以直接调用vue的方法
+                this.workspace_name = db;
+                var that = this;
+                const params = new URLSearchParams();
+                params.append('db', db);
+                params.append('type', position);
+                params.append('direction', rob);
+                axios.post(
+                    'http://120.53.107.137:8888/tcp', params,
+                    // 'tcp', params,
+                    {
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    }
+                )
+                    .then(function (response) {
+                        that.menudata = JSON.parse(JSON.stringify(response.data.parameters))
+                      
+                    })
+                    .catch(function (err) {console.log('error!') });
+            },
+            methods: {
+               
+
+
+            }
+        })
+    </script>
+   
+    <script>
+        function changesite(val) {
+        if (val == '站点') {
+            document.getElementById("lgroup").disabled = "true";
+            document.getElementById("lgroup").value = " ";
+
+        }
+        else {
+            document.getElementById("lgroup").disabled = "";
+        }
+    }
+        /*添加工作空间*/
+        function add() {
+            var mytab = document.getElementById("ltab");
+            //获取用户信息
+            var no = mytab.rows.length;
+            var lname = document.getElementById("location").value;
+            var ltype = document.getElementById("ltype").value;
+            var lgroup=document.getElementById("lgroup").value;
+            var index = lsetup.menudata.findIndex(item => item.name === lname);
+            var tabRow;
+
+            for (var i = 1; i < mytab.rows.length; i++) {
+                var num = mytab.rows[i].cells[1].innerText;
+
+                //如果当前的表单中工作空间名称和输入的工作空间名称有重复提示用户，并返回不添加
+                if (num == lname) {
+                    alert("该名称库位已存在");
+                    return false;
+                }
+            }
+
+            if (lname === ''||ltype==='') {
+                alert('请检查信息是否完整');
+                return false;
+            }
+            
+            if(ltype==='仓库' && lgroup===''){
+                alert('请检查信息是否完整');
+                return false;
+            }
+
+            else {
+                
+                const params = new URLSearchParams();
+              
+                params.append('name', lname);
+                params.append('direction', ltype,);
+                params.append('ip', lgroup);
+                params.append('db', db);
+                params.append('type', "kw");
+                params.append('top', lsetup.menudata[index].top);
+                params.append('left', lsetup.menudata[index].left);
+                axios.post(
+                    'add', params,
+                    {
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    }
+                )
+                    .then(function (response) {
+                      var res = response.data;
+                    if (res.status === 200) {
+                        console.log('OK')
+                        var temp;
+                //插入行的列
+                //要插入的行
+                tabRow = mytab.insertRow(mytab.rows.length);
+                tabRow.insertCell(0).innerHTML = no;
+                tabRow.insertCell(1).innerHTML = lname;
+                tabRow.insertCell(2).innerHTML = ltype;
+                tabRow.insertCell(3).innerHTML = lgroup;
+                tabRow.insertCell(4).innerHTML = "<a href='#' class='buinp' onclick=del(this)>删除</a>";
+                       
+                    }
+                    
+
+                    })
+                    .catch(function (err) { console.log('error!')})
+
+            }
+
+
+        }
+       
+       
+    </script>
+    
+</body>
+
+</html>

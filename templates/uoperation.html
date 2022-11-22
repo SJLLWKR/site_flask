@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script src="http://libs.baidu.com/jqueryui/1.8.22/jquery-ui.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style/admin.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <link href="style/fit.css" rel="stylesheet" type="text/css" />
+    <link href="style/fitmobile.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width,maximum-scale=1.0,initial-scale=1,user-scalable=no">
+    <title>用户操作</title>
+    <style>
+        input#wholeSelect {
+    width: 20px;
+    height: 23px;
+    vertical-align: -6px;
+    margin-right: 8px;
+}
+        .hidden-columns {
+            display: none;
+        }
+
+        .el-table__header-wrapper {
+            margin-bottom: -20px;
+            margin-top: 1%;
+            margin-left: -17px;
+            width: 100%;
+            background-color: #e9e9e9;
+        }
+
+        span.el-table__empty-text {
+            margin-left: 50%;
+            margin-top: 15%;
+            display: inline-block;
+        }
+
+        @media screen and (max-width:600px) {
+
+
+            .herder-left {
+                text-decoration: none;
+                color: white;
+                line-height: 79px;
+                display: inline-block;
+                width: 93px;
+                height: 77px;
+                font-size: 14px;
+                text-align: center;
+                text-indent: 2.5em;
+                background-size: 15%;
+                background-repeat: no-repeat;
+                background-position: 1.5em center;
+            }
+
+
+            .verticalw {
+                border-left: 2px solid #f1f1f1;
+                font-size: 14px;
+                width: 115px;
+                height: 77px;
+                position: absolute;
+                right: 0;
+            }
+
+
+        }
+    </style>
+</head>
+
+<body class="bod1">
+    <div class="search bar3">
+        <div class="imglo">
+        </div>
+        <div>
+            <a href="uoperation.html" style="background-image: url(image/set.png);" class="herder-left">叫料</a>
+        </div>
+
+        <div><a href="wulog.html" style="background-image: url(image/Wsite2.png);" class="herder-left">任务日志</a>
+        </div>
+        <div class="verticalw"><a style="background-image: url(image/shutdown_w.png); width: 130px;" class="herder-left"
+                onclick="removeCookies('userid')">安全退出</a> </div>
+
+
+    </div>
+
+    <div>
+        <div class="leftbox">
+            <div class="ltopbox">叫料</div>
+        </div>
+
+
+        <div class="login lleftbox">
+            <div class="timu">
+                <div style="background-position: 40px center;">叫料</div>
+            </div>
+
+
+            <div class="container" id="root">
+                <div class="butto3">
+                    <div>
+                        <select name="" class="butto1" id="db" @click='poste()' @change='post()'>
+                            <option value="">请选择工作空间</option>
+                            <option v-for="item in workspace" v-bind:value="item.name" v-text="item.name"></option>
+    
+    
+                        </select>
+                        <select name="" class="butto1" id="site" @click='postm()'>
+                            <option value="">请选择站点</option>
+                            <option v-for="item in site" v-bind:value="item.name" v-text="item.name"></option>
+    
+    
+                        </select>
+                        <span id='isback' >  <input type="checkbox" name="" id="wholeSelect">进口</span>
+                    </div>
+                 
+                  
+                   
+                    <input type="button" class="add" onclick="add()" value="呼叫">
+                </div>
+
+                <div class="tabcontainer">
+                    <table id='ptab'>
+                        <tbody id="ntable">
+                            <tr>
+                                <th>序号</th>
+                                <th>账号</th>
+                                <th>任务号</th>
+                                <th>站点</th>
+                               
+
+                                <th>开始时间</th>
+                                <th>状态</th>
+                                <th style="width: 200px;">操作</th>
+                            </tr>
+                            <tr v-cloak v-for="(item, index) of tableData">
+                                <td>{{index+1}}</td>
+                                <td>{{item.userid}}</td>
+                                <td>{{item.taskid}}</td>
+                                <td>{{item.direction}}</td>
+                             
+                                <td>{{item.time}}</td>
+                                <td>{{item.condition}}</td>
+                                <td>
+                                    <span><a href='#' class='buinp' @click=del(index)>取消</a></span>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+    var root = new Vue({
+        el: '#root',
+        data: {
+           
+            tableData: [
+
+            ],
+            flag: false,
+            time: '',
+            workspace: [],
+            site:[],
+            isback:''
+
+        },
+        mounted() {
+            window.alerte = this.alerte;              //可以直接调用vue的方法
+        },
+        methods: {
+            // 删除单个行
+            del(index) {
+              
+                const params = new URLSearchParams();
+                params.append('name', this.tableData[index].taskid);
+                params.append('type', 'task');
+
+                axios.post(
+                    'del', params,
+                    {
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    }
+
+                )
+                    .then(function (response) {
+                        var res = response.data;
+
+                    })
+                    .catch(function (err) { })
+
+                    this.tableData.splice(index, 1);
+
+
+
+            },
+            poste() {       //工作空间
+
+                var that = this;
+                axios.get(
+                    "getWork",
+                )
+                    .then(function (response) {
+
+                        that.workspace = JSON.parse(JSON.stringify(response.data.work)); //3.接收后端返回的参数
+
+                    })
+                    .catch(function (err) { })
+            },
+            postm() {       //site
+                const params = new URLSearchParams();
+                params.append('db', db.value);
+                params.append('type', 'ope');
+                axios.post("getLocation", params,
+                    {
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    })
+                    .then(function (response) {
+                        root.site = response.data.location  //3.接收后端返回的参数
+
+                    })
+                    .catch(function (err) { })
+            },
+            //发请求，获取表格信息
+            post() {
+                // var that = this;
+                var db = document.getElementById('db')
+                const params = new URLSearchParams();
+                params.append('db', db.value);
+                axios.post("getTask", params,
+                    {
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    })
+                    .then(function (response) {
+
+                        // console.log(response.data);
+                        root.tableData = response.data.task  //3.接收后端返回的参数
+
+                    })
+                    .catch(function (err) { })
+
+            },
+            //控制单双行颜色
+            tableRowClassName({ row, rowIndex }) {
+                if ((rowIndex + 1) % 2 === 0) {
+                    return 'double';
+                } else {
+                    return 'single';
+                }
+            },
+            tim() {
+                var date = new Date();//当前系统时间
+                var year = date.getFullYear();
+                var month = date.getMonth();
+                var de = date.getDate();
+                var hours = date.getHours();
+                var minutes = date.getMinutes();
+                var seconds = date.getSeconds();
+                
+                return year + '-' + (month + 1) + '-' + de + '  ' + hours + ':' + minutes + ':' + seconds;
+
+            },
+            alerte(e) {
+                $("body").append('<div id="msg"><div id="msg_top">' + '叫料' + '<span class="msg_close">×</span></div><div id="msg_cont">' + e + '<br><span class="xinjia">' + this.time + '</span></div><div class="msg_que" id="msg_clear">确定</div></div>');
+                $(".msg_close").click(function () {
+                    $("#msg").remove();
+                });
+
+                $(".msg_que1").click(function () {
+                    $("#msg").remove();
+                });
+
+                $(".msg_que").click(function () {
+                    $("#msg").remove();
+
+                });
+            }
+        }
+    })
+
+
+</script>
+<script>
+    var wholeSelect = $('#wholeSelect');
+    wholeSelect.change(function (e) {
+        var _this = $(this);
+        //判断全选按钮是否选中
+        if (_this.is(':checked')) {//选中时的操作
+            root.isback = 'true'
+        } else {//未选中时的操作
+            root.isback = 'false'
+
+        }
+    });
+    /*添加工作空间*/
+    function add() {
+        var that = this
+        var time = root.tim()
+        var mytab = document.getElementById("ptab");
+        //获取用户信息
+        var no = mytab.rows.length;
+        var db = document.getElementById('db')
+      
+        var site = document.getElementById('site')
+        var tabRow;
+        tabRow = mytab.insertRow(mytab.rows.length);
+        if (db.value === '' || site.value == '') {
+            alert('请选择信息')
+            return false;
+        }
+
+        const params = new URLSearchParams();
+        params.append('db', db.value);
+        params.append('direction', site.value);
+        params.append('isback', root.isback);
+        params.append('userid', document.cookie.split("=")[1],);
+        params.append('time', time);
+        params.append('order', 1);
+        // that.tableData.time=time
+
+        axios.post(
+            'exchange', params,
+            {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            }
+        )
+            .then(function (response) {
+                if (response.data === "on") {
+                    console.log(response.data)
+                    root.alerte("当前任务无法生成")
+                } else if (response.data == "get") {
+                    console.log(response.data)
+                    root.alerte("没有放空箱的地方")
+                } else if (response.data == "put") {
+                    console.log(response.data)
+                    root.alerte("暂时没有该物料")
+                } else if(response.status=="error"){
+                    console.log(response.data)
+                    root.alerte("调度系统连接失败")
+                }else {
+                    tabRow.insertCell(0).innerHTML = no;
+                    tabRow.insertCell(1).innerHTML = document.cookie.split("=")[1];
+                    tabRow.insertCell(2).innerHTML = response.data;
+                    tabRow.insertCell(3).innerHTML = site.value;
+                    
+                    tabRow.insertCell(4).innerHTML = time;
+                    tabRow.insertCell(5).innerHTML = '排队中';
+                    tabRow.insertCell(6).innerHTML = "<a href='#'  class='buinp'  onclick=del(this)>取消</a>";
+                }
+            })
+            .catch(function (err) { })
+        
+
+    }
+    function del(obj) {
+           
+           
+            var mytab = document.getElementById("ptab");
+
+            const params = new URLSearchParams();
+            params.append('name', obj.parentNode.parentNode.cells[2].innerText);
+            params.append('db', db);
+            params.append('type', "wl");
+            axios.post(
+                'del', params,
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                }
+
+            )
+                .then(function (response) {
+                    var res = response.data;
+
+                })
+                .catch(function (err) { })
+                obj.parentNode.parentNode.remove();
+            for (var i = 1; i <= mytab.rows.length; i++)
+                mytab.rows[i].cells[0].innerHTML = i;
+
+
+        }
+
+
+</script>
+
+</html>

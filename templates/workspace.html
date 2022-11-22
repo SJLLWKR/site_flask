@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../static/js/jquery.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <link href="../static/style/workspace.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="../static/js/cookie.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link href="../static/style/fit.css" rel="stylesheet" type="text/css" />
+    <link href="../static/style/fitmobile.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width,maximum-scale=1.0,initial-scale=1,user-scalable=no">
+    <title>工作空间</title>
+</head>
+
+<body>
+    <div class="search">
+        <div class="imglo">
+        </div>
+
+        <div><a href="workspace.html" style="background-image: url(../static/image/set.png);" class="herder-left">工作空间</a>
+        </div>
+        <div>
+            <ul id="list">
+                <li>
+                    <a href="#javascript" style="background-image: url(../static/image/mission.png);" class="herder-left">用户信息</a>
+                    <ul>
+                        <li><a href="muser.html">用户管理</a></li>
+                        <li><a href="mulog.html">用户日志</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="verticalw">
+            <a class="herder-left" style="width: 130px; background-image: url(../static/image/shutdown_w.png);"
+                onclick="removeCookies('userid')">安全退出</a>
+        </div>
+    </div>
+
+
+    <div>
+        <div class="leftbox">
+            <div class="ltopbox">工作空间</div>
+        </div>
+
+        <div class="login" id="mulog">
+            <div class="timu">
+                <div> 工作空间</div>
+            </div>
+
+            <div class="container" id="app">
+                <div class="butto">
+                    <input type="button" class="adduser" @click="add" value="+创建新的工作空间">
+                </div>
+
+                <div class="tabcontainer">
+                    <table>
+                        <tbody id="ntable">
+                            <tr>
+                                <th width="120px">id</th>
+                                <th class="unique" width="200px">工作空间名称</th>
+                                <th width="200px">交互对象</th>
+                                <th width="200px">IP</th>
+                                <th width="200px">位置数据类型</th>
+                                <th colspan="5">操作</th>
+                            </tr>
+                            {% for item in wklist %}
+                            <tr>
+                                <td>{{item.id}}</td>
+                                <td>{{item.name}}</td>
+                                <td>{{item.object}}</td>
+                                <td>{{item.IP}}</td>
+                                <td>{{item.address}}</td>
+                                <td style="padding: 0px 30px;"><a href="javascript:;" @click="showOverlaye({{ item.id }})">修改</a> </td>
+                                <td style="padding: 0px 30px;"><a href="javascript:;" @click="del({{ item.id }})">删除</a></td>
+                                <td style="padding: 0px 30px;"><a href='findspace.html' @click="use({{ item.id }})">查看</a></td>
+                                <td style="padding: 0px 30px;"><a href='lsetup.html' @click="use({{ item.id }})">库位设置</a></td>
+                                <td style="padding: 0px 30px;"><a href='modubus.html' @click="use({{ item.id }})">Modubus网关设置</a></td>
+
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+
+                    </table>
+
+                </div>
+                <model :list='selectedlist' :isactive="isActive" :robots="robots" :places="places" v-cloak
+                    @change="changeOverlay" @modify="modify">
+                </model>
+                <modele :list='selectedliste' :isactivee="isActivee" :robots="robots" :places="places" v-cloak
+                    @change="changeOverlaye" @modifye="modifye" :change_a='change_a'>
+                </modele>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="https://unpkg.com/vue@2.3.4/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript">
+        Vue.component('modele', {
+            props: ['list', 'isactivee', 'robots', 'places', 'change_a'],
+            template: `<div class="overlaye" v-show="isactivee">
+                        <div class="cone">
+                            <h2 class="titlee">工作空间</h2>
+                            <div class="content">                              
+                                <p> <img src="../static/image/w1.png" alt=""><span style="font-family: 微软雅黑;">&nbsp;&nbsp;&nbsp;</span>IP地址:</p>
+                                <input type="text"  class="addws" id='ip' v-model="modifyelist.ip" onBlur="txtblur(this)" autocomplete="off">                                           
+                                <p>
+                                    <button @click="changeActive" value="取消"  id='buto'>取消</button>
+                                    <button @click="modifye" value="确定" id='buto'>确定</button>
+                        
+                                </p>
+                        </div>
+                        </div>
+                    </div>`,
+            computed: {
+                modifyelist() {
+                    return this.list;
+                }
+            },
+            methods: {
+                changeActive() {
+                    this.$emit('change');
+                },
+                modifye() {
+                    this.$emit('modifye', this.modifyelist);
+                    console.log(this.modifyelist);
+                },
+
+            }
+        });
+        Vue.component('model', {
+            props: ['list', 'isactive', 'robots', 'places'],
+            template: `<div class="overlaye" v-show="isactive">
+                        <div class="cone">
+                            <h2 class="titlee">工作空间</h2>
+                            <div class="content">
+                                <p> <img src="../static/image/w1.png" alt=""><span style="font-family: 微软雅黑;">&nbsp;&nbsp;&nbsp;</span>交互对象:</p>
+                                <select  class="addws" v-model="modifylist.jiaohu" @change='judge($event)' id='jiaohu'>
+                                    <option value="机器人">机器人</option>
+                                    <option value="调度系统">调度系统</option>
+                                </select>
+                                <p> <img src="../static/image/w1.png" alt=""><span style="font-family: 微软雅黑;">&nbsp;&nbsp;&nbsp;</span>IP地址:</p>
+                                <input type="text"  class="addws" id='ip' v-model="modifylist.ip"  autocomplete="off">  
+                                <p id="sd"> <img src="../static/image/w1.png" alt=""><span style="font-family: 微软雅黑;">&nbsp;&nbsp;&nbsp;</span>机器人组:</p>
+                                <select class="addws" v-model="modifylist.duixiang" id="sdd" onclick="txtblur(this)"   autocomplete="off" >
+                                    <option v-for="item in robots" v-bind:value="item" v-text="item"></option>
+                                </select>
+                                <p> <img src="../static/image/w1.png" alt=""><span style="font-family: 微软雅黑;">&nbsp;&nbsp;&nbsp;</span>位置数据类型:</p>
+                                <select class="addws" id='address' onclick="getlocation(this)"  v-model="modifylist.address" autocomplete="off">   
+                                    <option v-for="item in places" v-bind:value="item" v-text="item"></option>
+                                </select>      
+                                <p> <img src="../static/image/w1.png" alt=""><span style="font-family: 微软雅黑;">&nbsp;&nbsp;&nbsp;</span>工作空间名称:</p>
+                                <input type="text" class="addws" id='name' v-model="modifylist.name" autocomplete="off">
+                                                                    
+                                <p>
+                                    <button @click="changeActive" id='buto' value="取消" \>取消</button>
+                                    <button @click="modify" value="确定"  id='buto'>确定</button>
+                        
+                                </p>
+                        </div>
+                        </div>
+                    </div>`,
+            computed: {
+                modifylist() {
+                    return this.list;
+                }
+            },
+            methods: {
+                changeActive() {
+                    this.$emit('change');
+                },
+                modify() {
+                    this.$emit('modify', this.modifylist);
+                },
+                judge(event) {
+                   
+                    if (event.target.value === "机器人") {
+                        var sd = document.getElementById('sd');
+                        var sdd = document.getElementById('sdd');
+                        sd.style.display = "none"
+                        sdd.style = "display:none"
+                    }
+                    else if (event.target.value === "调度系统") {
+                        var sd = document.getElementById('sd');
+                        var sdd = document.getElementById('sdd');
+                        sd.style = "display:block"
+                        sdd.style = "display:block"
+
+                    }
+                },
+
+            }
+        });
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                isActive: false,
+                isActivee: false,
+                selected: -1,
+                selectedlist: {},
+                selectedliste: {},
+                slist: [],
+                places: [],
+                change_a: false,
+                searchelist: [],
+                robots: [
+                    
+                ],
+                list: [
+                    
+                ]
+            },
+            created() {
+                this.setSlist(this.list);
+            },
+            methods: {
+                // 修改数据
+                showOverlaye(index) {
+                    this.selected = index;
+                    this.selectedliste = this.list[index-1];
+                    var s3 = document.getElementById("ntable");
+                    console.log(s3.rows[0].cells[2].innerHTML);
+                    if (s3.rows[index - 1].cells[2].innerHTML === "调度系统") {
+                        this.change_a = true
+                    }
+                    else if (s3.rows[index - 1].cells[2].innerHTML === "机器人") {
+                        this.change_a = false
+
+                    }
+                    this.changeOverlaye();
+                },
+                use(index) {
+                    localStorage.setItem("b", this.list[index].name);
+                    localStorage.setItem("type", this.list[index].address);
+                    localStorage.setItem("rob", this.list[index].robot);
+                },
+                // 确认修改按钮
+                modifye(arr) {
+                    console.log(arr);
+                    if (this.selected > -1) {
+                        console.log(123);
+                        Vue.set(this.list, this.selected, arr)
+                    }
+                    else {
+                        if (this.change_a) {
+                            var type2 = "ddxt"
+                        }
+                        else {
+                            var type2 = "jq"
+                        }
+                        this.list.push(arr);
+                        var that = this;
+                        const params = new URLSearchParams();
+                        params.append('ip', arr.ip,);
+                        params.append('name', arr.name,);
+                        params.append('db', type2,);
+                        params.append('type', "gzkj",);
+                        params.append('position', arr.address,);
+                        params.append('name2', arr.object,);
+                        axios.post("wkchange", params,
+                            {
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                            })
+                            .then(function (response) {
+                                var res = response.data;
+                                if (res.status === 200) {
+                                    console.log('OK')
+                                    console.log("change", response.data);
+                                    that.setSlist(that.list);
+                                    that.changeOverlaye();
+                                }
+                                else {
+                                    alert("添加失败")
+                                }
+                            })
+                            .catch(function (err) { })
+                    }
+                  
+                    var sd = document.getElementById('sd');
+                    var sdd = document.getElementById('sdd');
+                    sd.style = "display:block"
+                    sd.style.textIndent = "-30px"
+                    sdd.style = "display:block"
+                },
+                // 修改数据
+                showOverlay(index) {
+
+                    this.selected = index;
+                    this.selectedlist = this.list[index];
+                    this.changeOverlay();
+                },
+                // 增加工作空间按钮
+                modify(arr) {
+                    if (this.selected > -1) {
+                        Vue.set(this.list, this.selected, arr)
+                    }
+                    else {
+                        var sdd = document.getElementById('sdd');
+                        var ip = document.getElementById('ip');
+                        var name = document.getElementById('name');
+                        var address = document.getElementById('address');
+                        var jiaohu = document.getElementById('jiaohu');
+                        var s3 = document.getElementById("ntable");
+                        if (jiaohu.value === '' || ip.value === '' || address.value === '' || jiaohu.value === '' || name.value === '') {
+                            alert("请检查信息是否填写完整")
+                            return false
+                        }
+
+                        for (var i = 0; i < s3.rows.length - 1; i++) {
+                            if (this.list[i].name === name.value) {
+                                alert('当前工作空间名称已重复')
+                                return false
+                            }
+                            if (jiaohu.value === '机器人' && this.list[i].ip === ip.value) {
+                                alert('当前ip地址已重复')
+                                return false
+
+                            }
+                        }
+
+                        var that = this;
+                        const params = new URLSearchParams();
+                        params.append('ip', arr.ip,);
+                        params.append('direction', arr.jiaohu,);
+                        params.append('type', "gzkj",);
+                        params.append('name', arr.name,);
+                        params.append('position', arr.address,);
+                        params.append('db', arr.duixiang,);
+                        axios.post("add", params,
+                            {
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                            })
+                            .then(function (response) {
+                                var res = response.data;
+                                if (res.status === 200) {
+                                    console.log('OK')
+                                    console.log("change", response.data);
+                                    that.list.push(arr);
+                                    that.setSlist(that.list);
+                                    that.changeOverlay();
+                                }else{
+                                    alert("添加失败")
+                                }
+                            })
+                            .catch(function (err) { })
+                    }
+
+                   
+                    var sd = document.getElementById('sd');
+                    var sdd = document.getElementById('sdd');
+                    sd.style = "display:block"
+                    sd.style.textIndent = "-30px"
+                    sdd.style = "display:block"
+                },
+                add: function () {
+                    this.selectedlist = {
+                        jiaohu: '',
+                        address: '',
+                        ip: '',
+                        name: '',
+                        duixang: '',
+
+                    };
+                    this.isActive = true;
+
+                    // var that = this;
+                    //     axios.post("http://120.48.51.127:80/getReg", "{}",
+                    //         {
+                    //             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    //         })
+                    //         .then(function (response) {
+                    //             console.log("change", response.data);
+                    //         })
+                    //         .catch(function (err) { })
+                    
+
+                },
+                // delete list in index location
+                del(index) {
+                    var that = this;
+                    const params = new URLSearchParams();
+                    params.append('name', that.list[index].name,);
+                    params.append('ip', that.list[index].ip,);
+                    params.append('type', "gzkj",);
+                    axios.post("del", params,
+                        {
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                        })
+                        .then(function (response) {
+                            var res = response.data;
+                            if (res.status === 200) {
+                                console.log('OK')
+                                console.log("change", response.data);
+                                that.list.splice(index, 1);
+                                that.setSlist(that.list);
+                            }else{
+                                alert("删除失败")
+                            }
+
+                        })
+                        .catch(function (err) { })
+                   
+                },
+                changeOverlay() {
+                    this.isActive = !this.isActive;
+                },
+                changeOverlaye() {
+                    this.isActivee = !this.isActivee;
+                },
+                // 获取需要渲染到页面中的数据
+                setSlist(arr) {
+                    this.slist = JSON.parse(JSON.stringify(arr));
+                },
+            },
+        })
+    </script>
+    <script>
+        var txt;
+        var jiaohu = document.getElementById('jiaohu');
+        function txtblur(event) {
+            console.log(document.getElementById("ip").value);
+            var ip = document.getElementById("ip").value;
+            console.log("txtblur", ip)
+            // var txt = event.value//ip
+            // if (jiaohu.value === "机器人") {
+            //     const params = new URLSearchParams();
+            //     params.append('ip', txt,);
+            //     params.append('type', "jq",);
+
+            //     axios.post("getplaces", params,//获取机器人组
+            //         {
+            //             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            //         })
+            //         .then(function (response) {
+            //             console.log("change", response.data);
+            //             if(response.data.status==="error"){
+            //                 console.log("change", response.data);
+            //                 alert("连接失败")
+            //                 return;
+            //             }
+            //             app.places = response.data.paramtypes
+            //             console.log(app.places)
+            //         })
+            //         .catch(function (err) { })
+            //     //当前元素失去焦点
+            // }
+            // else {
+            const params = new URLSearchParams();
+            params.append('ip', ip,);
+            params.append('type', "ddxt",);
+            axios.post("getfactory", params,//获取机器人组
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                })
+                .then(function (response) {
+                    if(response.data.status==="error"){
+                        alert("连接失败")
+                        return;
+                    }
+                    app.robots = response.data.groups
+                })
+                .catch(function (err) { })
+                //当前元素失去焦点
+            // }
+
+        }
+
+        function getlocation(event) {
+            var that = this
+            var ip = document.getElementById("IP").value;
+            var group = document.getElementById("sdd").value;
+            const params = new URLSearchParams();
+            params.append('name', group,);
+            params.append('ip', ip,);
+            axios.post("getplaces", params,
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                })
+                .then(function (response) {
+                    console.log(response);
+                    if(response.data.status==="error"){
+                        alert("连接失败")
+                        return;
+                    }
+                    app.places = response.data["param-types"]
+                })
+                .catch(function (err) { console.log("error"); })
+        }
+
+        window.onload = function () {
+            axios.get('getWork')
+                .then(function (response) {
+                    if (JSON.stringify(response.data) === '{}') {
+                        app.setSlist(app.list)
+                        return;
+                    }
+                    app.list = response.data
+                    console.log(app.list);
+                    app.setSlist(app.list)
+                    {#location.href = "workspace.html";#}
+                })
+                .catch(function (err) { })
+        }
+
+
+
+
+
+    </script>
+
+</body>
+
+</html>
